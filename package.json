@@ -1,0 +1,15 @@
+{
+  "author": "Jesse Proulx <github@jproulx.net>",
+  "name": "Gigya-Node-SDK",
+  "description": "Wrappers around Gigya's REST API",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jproulx/Gigya-Node-SDK.git"
+  },
+  "engines": {
+    "node": "~0.6.5"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
