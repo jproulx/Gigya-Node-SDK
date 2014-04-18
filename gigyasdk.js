@@ -1,5 +1,45 @@
 /*globals require, module, Buffer */
 "use strict";
+
+var services = {
+    'socialize' : [
+        'checkin', 'deleteAccount', 'delUserSettings', 'getAlbums',
+        'getContacts', 'getFeed', 'getFriendsInfo', 'getPhotos',
+        'getPlaces', 'getRawData', 'getSessionInfo', 'getUserInfo',
+        'getUserSettings', 'logout', 'notifyLogin',
+        'notifyRegistration', 'publishUserAction', 'removeConnection',
+        'sendNotification', 'setStatus', 'setUID', 'setUserSettings',
+        'shortenURL'
+    ],
+    'comments' : [
+        'flagComment', 'getComments', 'getStreamInfo', 'getTopStreams',
+        'postComment', 'setStreamInfo', 'vote'
+    ],
+    'gm' : [
+        'getChallengeConfig', 'getChallengeStatus', 'getTopUsers',
+        'notifyAction', 'redeemPoints', 'resetLevelStatus'
+    ],
+    'gcs' : [
+        'deleteObjectData', 'deleteUserData', 'getobjectData',
+        'getUserData', 'search', 'setObjectData', 'setUserData'
+    ],
+    'reports' : [
+        'getSocializeStats'
+    ],
+    'accounts' : [
+        'deleteAccount','deleteScreenSet','finalizeRegistration','getAccountInfo','getCounters','getPolicies','getRegisteredCounters',
+        'getSchema','getScreenSets','importProfilePhoto','incrementCounters','initRegistration','isAvailableLoginID',
+        'linkAccounts','login','logout','notifyLogin','publishProfilePhoto','register','registerCounters','resendVerificationCode',
+        'resetPassword','search','search Examples','setAccountInfo','setPolicies','setSchema','setScreenSet','socialLogin','unregisterCounters'
+    ],
+    'ds' : [
+        'delete', 'get',
+        'getSchema', 'setSchema',
+        'search',
+        'store'
+    ]
+};
+
 /**
  * Shallow object merge
  *
@@ -149,43 +189,6 @@ function GigyaSDK(config) {
     }
     var self     = this,
         wrappers = {},
-        services = {
-            'socialize' : [
-                'checkin', 'deleteAccount', 'delUserSettings', 'getAlbums',
-                'getContacts', 'getFeed', 'getFriendsInfo', 'getPhotos',
-                'getPlaces', 'getRawData', 'getSessionInfo', 'getUserInfo',
-                'getUserSettings', 'logout', 'notifyLogin',
-                'notifyRegistration', 'publishUserAction', 'removeConnection',
-                'sendNotification', 'setStatus', 'setUID', 'setUserSettings',
-                'shortenURL'
-            ],
-            'comments' : [
-                'flagComment', 'getComments', 'getStreamInfo', 'getTopStreams',
-                'postComment', 'setStreamInfo', 'vote'
-            ],
-            'gm' : [
-                'getChallengeConfig', 'getChallengeStatus', 'getTopUsers',
-                'notifyAction', 'redeemPoints', 'resetLevelStatus'
-            ],
-            'accounts' : [
-                'getSchema', 'setSchema',
-                'login', 'logout', 'search',
-                'setAccountInfo', 'getAccountInfo'
-            ],
-            'ds' : [
-                'delete', 'get',
-                'getSchema', 'setSchema',
-                'search',
-                'store'
-            ],
-            'gcs' : [
-                'deleteObjectData', 'deleteUserData', 'getobjectData',
-                'getUserData', 'search', 'setObjectData', 'setUserData'
-            ],
-            'reports' : [
-                'getSocializeStats'
-            ]
-        },
         defaults = {
             'apiKey'    : null,
             'secret'    : null,
@@ -326,115 +329,22 @@ GigyaSDK.prototype.validateFriendSignature = function (UID, timestamp, friendUID
         expected = createSignature(base, this.options.secret);
     return expected === signature;
 };
-/**
- * Asynchronous caller for Socialize services
- *
- * @access  public
- * @param   String      method
- * @param   Object      params
- * @param   Function    callback
- * @return  void
- */
-GigyaSDK.prototype.socialize = function (method, params, callback) {
-    return this.request({
-        'service' : 'socialize',
-        'method'  : method,
-        'params'  : params
-    }, callback);
-};
-/**
- * Asynchronous caller for Comment services
- *
- * @access  public
- * @param   String      method
- * @param   Object      params
- * @param   Function    callback
- * @return  void
- */
-GigyaSDK.prototype.comments = function (method, params, callback) {
-    return this.request({
-        'service' : 'comments',
-        'method'  : method,
-        'params'  : params
-    }, callback);
-};
-/**
- * Asynchronous caller for Game Mechanic services
- *
- * @access  public
- * @param   String      method
- * @param   Object      params
- * @param   Function    callback
- * @return  void
- */
-GigyaSDK.prototype.gm = function (method, params, callback) {
-    return this.request({
-        'service' : 'gm',
-        'method'  : method,
-        'params'  : params
-    }, callback);
-};
-/**
- * Asynchronous caller for Cloud Storage services
- *
- * @access  public
- * @param   String      method
- * @param   Object      params
- * @param   Function    callback
- * @return  void
- */
-GigyaSDK.prototype.gcs = function (method, params, callback) {
-    return this.request({
-        'service' : 'gcs',
-        'method'  : method,
-        'params'  : params
-    }, callback);
-};
-/**
- * Asynchronous caller for Reports services
- *
- * @access  public
- * @param   String      method
- * @param   Object      params
- * @param   Function    callback
- * @return  void
- */
-GigyaSDK.prototype.reports = function (method, params, callback) {
-    return this.request({
-        'service' : 'reports',
-        'method'  : method,
-        'params'  : params
-    }, callback);
-};
-/**
- * Asynchronous caller for Storage services
- *
- * @access  public
- * @param   String      method
- * @param   Object      params
- * @param   Function    callback
- * @return  void
- */
-GigyaSDK.prototype.ds = function (method, params, callback) {
-    return this.request({
-        'service' : 'ds',
-        'method'  : method,
-        'params'  : params
-    }, callback);
-};
-/**
- * Asynchronous caller for Storage services
- *
- * @access  public
- * @param   String      method
- * @param   Object      params
- * @param   Function    callback
- * @return  void
- */
-GigyaSDK.prototype.accounts = function (method, params, callback) {
-    return this.request({
-        'service' : 'accounts',
-        'method'  : method,
-        'params'  : params
-    }, callback);
-};
+
+Object.getOwnPropertyNames(services).forEach(function (service) {
+    /**
+    * Asynchronous caller for Socialize services
+    *
+    * @access  public
+    * @param   String      method
+    * @param   Object      params
+    * @param   Function    callback
+    * @return  void
+    */
+    GigyaSDK.prototype[service] = function (method, params, callback) {
+        return this.request({
+            'service' : service,
+            'method'  : method,
+            'params'  : params
+        }, callback);
+    };
+});
