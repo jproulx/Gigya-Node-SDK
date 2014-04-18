@@ -44,7 +44,7 @@ function createNonce(size) {
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
         ],
-        char_pos = 0,
+        // char_pos = 0,
         nonce_chars_length = chars.length,
         i = 0;
     for (i = 0; i < size; i += 1) {
@@ -167,6 +167,17 @@ function GigyaSDK(config) {
                 'getChallengeConfig', 'getChallengeStatus', 'getTopUsers',
                 'notifyAction', 'redeemPoints', 'resetLevelStatus'
             ],
+            'accounts' : [
+                'getSchema', 'setSchema',
+                'login', 'logout', 'search',
+                'setAccountInfo', 'getAccountInfo'
+            ],
+            'ds' : [
+                'delete', 'get',
+                'getSchema', 'setSchema',
+                'search',
+                'store'
+            ],
             'gcs' : [
                 'deleteObjectData', 'deleteUserData', 'getobjectData',
                 'getUserData', 'search', 'setObjectData', 'setUserData'
@@ -210,7 +221,7 @@ module.exports = GigyaSDK;
  */
 GigyaSDK.prototype.request = function (options, callback) {
     var qs        = require('querystring'),
-        fs        = require('fs'),
+        // fs        = require('fs'),
         opts      = null,
         request   = null;
     // Mash together all of the options
@@ -296,8 +307,8 @@ GigyaSDK.prototype.raw = function (request, options, callback) {
  * @return  Boolean
  */
 GigyaSDK.prototype.validateUserSignature = function (UID, timestamp, signature) {
-    var base     = [timestamp, UID].join('_'),
-        expected = createSignature(base, this.options.secret);
+    var base     = [timestamp, UID].join('_');
+    var expected = createSignature(base, this.options.secret);
     return expected === signature;
 };
 /**
@@ -391,6 +402,38 @@ GigyaSDK.prototype.gcs = function (method, params, callback) {
 GigyaSDK.prototype.reports = function (method, params, callback) {
     return this.request({
         'service' : 'reports',
+        'method'  : method,
+        'params'  : params
+    }, callback);
+};
+/**
+ * Asynchronous caller for Storage services
+ *
+ * @access  public
+ * @param   String      method
+ * @param   Object      params
+ * @param   Function    callback
+ * @return  void
+ */
+GigyaSDK.prototype.ds = function (method, params, callback) {
+    return this.request({
+        'service' : 'ds',
+        'method'  : method,
+        'params'  : params
+    }, callback);
+};
+/**
+ * Asynchronous caller for Storage services
+ *
+ * @access  public
+ * @param   String      method
+ * @param   Object      params
+ * @param   Function    callback
+ * @return  void
+ */
+GigyaSDK.prototype.accounts = function (method, params, callback) {
+    return this.request({
+        'service' : 'accounts',
         'method'  : method,
         'params'  : params
     }, callback);
