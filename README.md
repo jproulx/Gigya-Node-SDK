@@ -1,3 +1,6 @@
+## Usage
+
+```javascript
 var  GigyaSDK  = require('gigyasdk'),
      Gigya     = new GigyaSDK({
          'apiKey' : '',
@@ -14,3 +17,4 @@ Gigya.services.socialize.getUserInfo({ 'uid' : '' }, function callback(error, re
         console.log(result);
     }
 });
+```
