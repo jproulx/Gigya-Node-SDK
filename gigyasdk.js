@@ -187,7 +187,7 @@ function createSignature(string, key) {
  * @return  String
  */
 function createRequestSignature(options, key) {
-    var domain = [options.service, options.domain].join('.'),
+    var domain = [options.service, options.datacenter, options.domain].join('.'),
         path   = '/' + [options.service, options.method].join('.'),
         proto  = 'http://',
         url    = null,
