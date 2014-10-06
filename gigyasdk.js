@@ -334,7 +334,7 @@ GigyaSDK.prototype.raw = function (request, options, callback) {
     });
     // Request level errors
     client.on('error', function (error) {
-        return callback(error);
+        return callback('Could not execute GigyaSDK call: ' + error ? JSON.stringify(error) : null);
     });
     // We need to write the POST parameters to the request stream
     if (options.reqMethod.toUpperCase() === 'POST') {
