@@ -3,41 +3,74 @@
 
 var services = {
     'socialize' : [
-        'checkin', 'deleteAccount', 'delUserSettings', 'getAlbums',
-        'getContacts', 'getFeed', 'getFriendsInfo', 'getPhotos',
-        'getPlaces', 'getRawData', 'getSessionInfo', 'getUserInfo',
-        'getUserSettings', 'logout', 'notifyLogin',
+        'checkin', 'deleteAccount', 'delUserSettings', 'exportUsers',
+        'facebookGraphOperation', 'getAlbums', 'getContacts', 'getFeed',
+        'getFriendsInfo', 'getPhotos', 'getPlaces', 'getRawData',
+        'getReactionsCount', 'getSessionInfo', 'getTopShares', 'getUserInfo',
+        'getUserSettings', 'incrementReactionsCount', 'logout', 'notifyLogin',
         'notifyRegistration', 'publishUserAction', 'removeConnection',
-        'sendNotification', 'setStatus', 'setUID', 'setUserSettings',
-        'shortenURL'
-    ],
-    'comments' : [
-        'flagComment', 'getComments', 'getStreamInfo', 'getTopStreams',
-        'postComment', 'setStreamInfo', 'vote'
-    ],
-    'gm' : [
-        'getChallengeConfig', 'getChallengeStatus', 'getTopUsers',
-        'notifyAction', 'redeemPoints', 'resetLevelStatus'
-    ],
-    'gcs' : [
-        'deleteObjectData', 'deleteUserData', 'getobjectData',
-        'getUserData', 'search', 'setObjectData', 'setUserData'
-    ],
-    'reports' : [
-        'getSocializeStats'
+        'sendNotification', 'setStatus', 'setUID', 'setUserInfo',
+        'setUserSettings', 'shortenURL'
     ],
     'accounts' : [
-        'deleteAccount','deleteScreenSet','finalizeRegistration','getAccountInfo','getCounters','getPolicies','getRegisteredCounters',
-        'getSchema','getScreenSets','importProfilePhoto','incrementCounters','initRegistration','isAvailableLoginID',
-        'linkAccounts','login','logout','notifyLogin','publishProfilePhoto','register','registerCounters','resendVerificationCode',
-        'resetPassword','search','search Examples','setAccountInfo','setPolicies','setSchema','setScreenSet','socialLogin','unregisterCounters'
+        'deleteAccount', 'deleteScreenSet', 'finalizeRegistration', 'getAccountInfo',
+        'getConflictingAccount', 'getCounters', 'getPolicies', 'getProfilePhoto',
+        'getRegisteredCounters', 'getSchema', 'getScreenSets', 'importProfilePhoto',
+        'incrementCounters', 'initRegistration', 'isAvailableLoginID', 'linkAccounts',
+        'login', 'logout', 'notifyLogin', 'publishProfilePhoto', 'register',
+        'registerCounters', 'resendVerificationCode', 'resetPassword', 'search',
+        'setAccountInfo', 'setPolicies', 'setProfilePhoto', 'setSchema', 'setScreenSet',
+        'socialLogin', 'unregisterCounters', 'uploadProfilePhoto',
+        // Two-Factor Authentication
+        // Added in v5.0
+        'tfa.deactivateProvider', 'tfa.finalizeTFA', 'tfa.getCertificate',
+        'tfa.getProviders', 'tfa.initTFA', 'tfa.unregisterDevice'
+    ],
+    'comments' : [
+        'analyzeMediaItem', 'deleteComment', 'flagComment', 'getCategories',
+        'getCategoryInfo', 'getComments', 'getRelatedUsers', 'getStreamInfo',
+        'getTopRatedStreams', 'getTopStreams', 'getUserComments', 'getUserHighlighting',
+        'getUserOptions', 'highlightUser', 'moveComments', 'postComment',
+        'getCategoryInfo', 'setStreamInfo', 'setUserOptions', 'subscribe', 'unsubscribe',
+        'updatedComment', 'vote'
+    ],
+    'gm' : [
+        'deleteAction', 'deleteChallenge', 'deleteChallengeVariant',
+        'getActionConfig', 'getActionsLog', 'getChallengeConfig',
+        'getChallengeStatus', 'getChallengeVariant', 'getGlobalConfig',
+        'getTopUsers', 'notifyAction', 'redeemPoints', 'resetLevelStatus',
+        'setAccountConfig', 'setChallengeConfig', 'setGlobalConfig'
+    ],
+    'reports' : [
+        'getAccountsStats', 'getChatStats', 'getCommentsStats',
+        'getFeedStats', 'getGMStats', 'getGMTopUsers', 'getGMUserStats',
+        'getIRank', 'getReactionsStats', 'getSocializeStats'
     ],
     'ds' : [
         'delete', 'get',
         'getSchema', 'setSchema',
         'search',
         'store'
-    ]
+    ],
+    // Federated Identity Providers (FIdP) / SAML
+    // Added in v5.1
+    'fidm' : [
+        'saml.delIdP', 'saml.getConfig', 'saml.getRegisteredIdPs',
+        'saml.importIdPMetadata', 'saml.registerIdP', 'saml.setConfig'
+    ],
+    // Added in v2.0
+    'ids' : [
+        'deleteAccount', 'getAccountInfo', 'getCounters',
+        'getRegisteredCounters', 'getSchema', 'incrementCounters',
+        'registerCounters', 'search', 'setAccountInfo',
+        'setSchema', 'unregisterCounters'
+    ],
+    // Replaced with Identity Storage v2.0
+    // GCS is deprecated as v5.2 Aug.2014
+    'gcs' : [
+        'deleteObjectData', 'deleteUserData', 'getobjectData',
+        'getUserData', 'search', 'setObjectData', 'setUserData'
+    ],
 };
 
 /**
@@ -154,7 +187,7 @@ function createSignature(string, key) {
  * @return  String
  */
 function createRequestSignature(options, key) {
-    var domain = [options.service, options.domain].join('.'),
+    var domain = [options.service, options.datacenter, options.domain].join('.'),
         path   = '/' + [options.service, options.method].join('.'),
         proto  = 'http://',
         url    = null,
@@ -190,14 +223,16 @@ function GigyaSDK(config) {
     var self     = this,
         wrappers = {},
         defaults = {
-            'apiKey'    : null,
-            'secret'    : null,
-            'domain'    : 'gigya.com',
-            'service'   : 'socialize',
-            'method'    : null,
-            'reqMethod' : 'GET',
-            'nonceSize' : 32,
-            'ssl'       : false
+            'apiKey'        : null,
+            'secret'        : null,
+            'domain'        : 'gigya.com',
+            'datacenter'    : 'us1', // us1, eu1 or au1 (available Nov. 2014)
+            'service'       : 'socialize',
+            'method'        : null,
+            'reqMethod'     : 'GET',
+            'nonceSize'     : 32,
+            'connectionTimeout': 10000,
+            'ssl'           : false
         };
     this.options = merge(defaults, config);
     Object.getOwnPropertyNames(services).forEach(function (service) {
@@ -243,7 +278,7 @@ GigyaSDK.prototype.request = function (options, callback) {
     opts.params = qs.stringify(opts.params);
     // Setup request parameters
     request = {
-        'host'    : [opts.service, opts.domain].join('.'),
+        'host'    : [opts.service, opts.datacenter, opts.domain].join('.'),
         'path'    : '/' + [opts.service, opts.method].join('.'),
         'method'  : opts.reqMethod,
         'headers' : {
@@ -274,6 +309,13 @@ GigyaSDK.prototype.raw = function (request, options, callback) {
         chunks = [];
     // Create request
     client = createClient(request, options.ssl);
+
+    // Avoid that connections hang undefinitely
+    client.setTimeout(this.options.connectionTimeout,function() {
+      // console.log('timeout occurred');
+      client.abort();
+    });
+
     client.on('response', function (response) {
         response.setEncoding('utf8');
         // Collect chunks
@@ -328,6 +370,13 @@ GigyaSDK.prototype.validateFriendSignature = function (UID, timestamp, friendUID
     var base     = [timestamp, friendUID, UID].join('_'),
         expected = createSignature(base, this.options.secret);
     return expected === signature;
+};
+
+GigyaSDK.prototype.escapedb = function(text) {
+  if (text) {
+    text = text.replace("'", "\\'").replace('"', '\\"');
+  }
+  return text;
 };
 
 Object.getOwnPropertyNames(services).forEach(function (service) {
